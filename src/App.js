@@ -1,25 +1,53 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import AddProduct from './components/addproduct';
+import ProductList from './components/productlist';
+import Sidebar from './components/slidebar';
+import OffterProduct from './components/offterproduct';
+import { fetchProducts } from './services/productService'; // Importa la función fetchProducts
+import './index.css';
 
-function App() {
+const App = () => {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchProductsData = async () => {
+      try {
+        const productsData = await fetchProducts(); // Llama a fetchProducts para obtener productos desde Firebase
+        setProducts(productsData); // Actualiza el estado con los productos obtenidos
+      } catch (error) {
+        console.error('Error al cargar los productos:', error);
+        // Maneja el error según sea necesario
+      }
+    };
+
+    fetchProductsData();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow-lg flex overflow-hidden w-[95%] max-w-[1200px] h-[80%] max-h-[720px]">
+          <Sidebar />
+          <div className="flex-1 flex flex-col">
+            <header className="bg-white shadow px-4 py-6 sm:px-6 lg:px-8">
+              <h1 className="text-3xl font-bold text-gray-900">Gestión de Inventario</h1>
+            </header>
+            <main className="flex-1 p-6 overflow-y-auto">
+              <div className="bg-white shadow rounded-lg p-4">
+                <Routes>
+                  <Route path="/add-product" element={<AddProduct />} />
+                  <Route path="/product-list" element={<ProductList products={products} />} />
+                  <Route path="/" element={<ProductList products={products} />} />
+                  <Route path="/offers" element={<OffterProduct products={products} />} />
+                </Routes>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+    </Router>
   );
-}
+};
 
 export default App;
