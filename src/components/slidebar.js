@@ -37,7 +37,7 @@ const Sidebar = () => {
             }
           >
             <FontAwesomeIcon icon={faTags} className="mr-3" />
-            Ofertas 
+            codigos 
           </NavLink>
         </div>
       </nav>

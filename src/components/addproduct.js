@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { db } from '../firebase';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection } from 'firebase/firestore';
 import Swal from 'sweetalert2';
 
 const AddProduct = () => {
@@ -9,11 +9,12 @@ const AddProduct = () => {
   const [stock, setStock] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState('');
+  const [category, setCategory] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !price || !stock || !description || !image) {
+    if (!name || !price || !stock || !description || !image || !category) {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -23,36 +24,34 @@ const AddProduct = () => {
       return;
     }
 
-    // Determine stock category
-    const category = getStockCategory(parseInt(stock, 10));
+    // Validar precio y stock para que sean números enteros positivos
+    if (!Number.isInteger(Number(price)) || Number(price) <= 0 || !Number.isInteger(Number(stock)) || Number(stock) <= 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'El precio y el stock deben ser números enteros positivos.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
 
     try {
-      // Formatear la fecha actual en dd/mm/yyyy
-      const now = new Date();
-      const day = now.getDate().toString().padStart(2, '0');
-      const month = (now.getMonth() + 1).toString().padStart(2, '0');
-      const year = now.getFullYear();
-      const formattedDate = `${day}/${month}/${year}`;
-
-      // Guardar el producto en Firestore
       await addDoc(collection(db, 'products'), {
         name,
-        price: parseFloat(price),
+        price: parseInt(price, 10),
         stock: parseInt(stock, 10),
         description,
         image,
-        formattedDate, // Guardar la fecha formateada como string (opcional)
-        category, // Guardar la categoría de stock
+        category,
       });
 
-      // Limpiar los campos del formulario después de agregar el producto
       setName('');
       setPrice('');
       setStock('');
       setDescription('');
       setImage('');
+      setCategory('');
 
-      // Mostrar mensaje de éxito al usuario
       Swal.fire({
         icon: 'success',
         title: 'Producto agregado',
@@ -61,8 +60,6 @@ const AddProduct = () => {
       });
     } catch (error) {
       console.error('Error al agregar el producto: ', error);
-
-      // Mostrar mensaje de error al usuario si falla la operación
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -70,13 +67,6 @@ const AddProduct = () => {
         confirmButtonText: 'Aceptar',
       });
     }
-  };
-
-  const getStockCategory = (stock) => {
-    if (stock === 0) return 'No hay stock';
-    if (stock < 3) return 'Bajo stock';
-    if (stock > 60) return 'Sobre stock';
-    return 'Normal';
   };
 
   return (
@@ -122,6 +112,23 @@ const AddProduct = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               required
             />
+          </div>
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="category">
+              Categoría
+            </label>
+            <select
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required
+            >
+              <option value="">Seleccione una categoría</option>
+              <option value="herramienta electrica">Herramienta Eléctrica</option>
+              <option value="herramienta normal">Herramienta Normal</option>
+              <option value="herramienta pesada">Herramienta Pesada</option>
+            </select>
           </div>
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
