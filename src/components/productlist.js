@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc } from 'firebase/firestore';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt, faEdit, faTag } from '@fortawesome/free-solid-svg-icons';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
+  const [currentUser, setCurrentUser] = useState(''); // Assuming you have a way to get the current user's name
+
+  useEffect(() => {
+    // Fetch the current user from your auth context or service
+    setCurrentUser('NombreUsuario'); // Replace with actual current user fetching logic
+    loadProducts();
+  }, []);
 
   const loadProducts = async () => {
     const querySnapshot = await getDocs(collection(db, 'products'));
@@ -28,6 +35,12 @@ const ProductList = () => {
       if (result.isConfirmed) {
         try {
           await deleteDoc(doc(db, 'products', id));
+          await addDoc(collection(db, 'notifications'), {
+            action: 'Producto eliminado',
+            productName: products.find(product => product.id === id).name,
+            user: currentUser,
+            timestamp: new Date(),
+          });
           loadProducts();
 
           Swal.fire(
@@ -94,6 +107,12 @@ const ProductList = () => {
     if (formValues) {
       try {
         await updateDoc(doc(db, 'products', product.id), formValues);
+        await addDoc(collection(db, 'notifications'), {
+          action: 'Producto modificado',
+          productName: formValues.name,
+          user: currentUser,
+          timestamp: new Date(),
+        });
         loadProducts();
 
         Swal.fire(
@@ -128,6 +147,13 @@ const ProductList = () => {
     if (offer) {
       try {
         await updateDoc(doc(db, 'products', product.id), { offer });
+        await addDoc(collection(db, 'notifications'), {
+          action: 'Oferta creada',
+          productName: product.name,
+          offer: offer,
+          user: currentUser,
+          timestamp: new Date(),
+        });
         loadProducts();
 
         Swal.fire(
@@ -145,10 +171,6 @@ const ProductList = () => {
       }
     }
   };
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
 
   const getStockStatus = (stock) => {
     if (stock === 0) return 'No hay stock';

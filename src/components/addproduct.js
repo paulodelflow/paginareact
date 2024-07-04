@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import Swal from 'sweetalert2';
 
 const AddProduct = () => {
@@ -10,6 +10,12 @@ const AddProduct = () => {
   const [description, setDescription] = useState('');
   const [image, setImage] = useState('');
   const [category, setCategory] = useState('');
+  const [currentUser, setCurrentUser] = useState(''); // Assuming you have a way to get the current user's name
+
+  useEffect(() => {
+    // Fetch the current user from your auth context or service
+    setCurrentUser('NombreUsuario'); // Replace with actual current user fetching logic
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,12 +30,24 @@ const AddProduct = () => {
       return;
     }
 
-    // Validar precio y stock para que sean números enteros positivos
     if (!Number.isInteger(Number(price)) || Number(price) <= 0 || !Number.isInteger(Number(stock)) || Number(stock) <= 0) {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
         text: 'El precio y el stock deben ser números enteros positivos.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    // Check if product already exists
+    const q = query(collection(db, 'products'), where('name', '==', name));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'El producto ya existe.',
         confirmButtonText: 'Aceptar',
       });
       return;
@@ -43,6 +61,13 @@ const AddProduct = () => {
         description,
         image,
         category,
+      });
+
+      await addDoc(collection(db, 'notifications'), {
+        action: 'Producto agregado',
+        productName: name,
+        user: currentUser,
+        timestamp: new Date(),
       });
 
       setName('');
@@ -84,6 +109,7 @@ const AddProduct = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              maxLength="20"
               required
             />
           </div>
@@ -97,6 +123,7 @@ const AddProduct = () => {
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              max="999999999"
               required
             />
           </div>
@@ -110,6 +137,7 @@ const AddProduct = () => {
               value={stock}
               onChange={(e) => setStock(e.target.value)}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              max="999"
               required
             />
           </div>

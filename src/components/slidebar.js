@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faList, faUser, faTags, faCalendar } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faList, faTags, faBell } from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar = () => {
   return (
@@ -28,18 +28,24 @@ const Sidebar = () => {
           <FontAwesomeIcon icon={faPlus} className="mr-3" />
           Añadir Producto
         </NavLink>
-        <div className="mt-4">
-
-          <NavLink 
-            to="/offers" 
-            className={({ isActive }) => 
-              isActive ? "flex items-center px-4 py-2 text-gray-700 bg-gray-200 mt-2" : "flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200 mt-2"
-            }
-          >
-            <FontAwesomeIcon icon={faTags} className="mr-3" />
-            codigos 
-          </NavLink>
-        </div>
+        <NavLink 
+          to="/offers" 
+          className={({ isActive }) => 
+            isActive ? "flex items-center px-4 py-2 text-gray-700 bg-gray-200 mt-2" : "flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200 mt-2"
+          }
+        >
+          <FontAwesomeIcon icon={faTags} className="mr-3" />
+          codigos
+        </NavLink>
+        <NavLink 
+          to="/notifications" 
+          className={({ isActive }) => 
+            isActive ? "flex items-center px-4 py-2 text-gray-700 bg-gray-200 mt-2" : "flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200 mt-2"
+          }
+        >
+          <FontAwesomeIcon icon={faBell} className="mr-3" />
+          Notificaciones
+        </NavLink>
       </nav>
     </div>
   );

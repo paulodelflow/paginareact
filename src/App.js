@@ -4,7 +4,8 @@ import AddProduct from './components/addproduct';
 import ProductList from './components/productlist';
 import Sidebar from './components/slidebar';
 import OffterProduct from './components/offterproduct';
-import { fetchProducts } from './services/productService'; // Importa la función fetchProducts
+import Notification from './components/Notification'; // Import the Notification component
+import { fetchProducts } from './services/productService';
 import './index.css';
 
 const App = () => {
@@ -13,11 +14,10 @@ const App = () => {
   useEffect(() => {
     const fetchProductsData = async () => {
       try {
-        const productsData = await fetchProducts(); // Llama a fetchProducts para obtener productos desde Firebase
-        setProducts(productsData); // Actualiza el estado con los productos obtenidos
+        const productsData = await fetchProducts();
+        setProducts(productsData);
       } catch (error) {
         console.error('Error al cargar los productos:', error);
-        // Maneja el error según sea necesario
       }
     };
 
@@ -40,6 +40,7 @@ const App = () => {
                   <Route path="/product-list" element={<ProductList products={products} />} />
                   <Route path="/" element={<ProductList products={products} />} />
                   <Route path="/offers" element={<OffterProduct products={products} />} />
+                  <Route path="/notifications" element={<Notification />} /> {/* Add the route for Notification */}
                 </Routes>
               </div>
             </main>
